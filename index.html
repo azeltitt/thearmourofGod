@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
+<title>The Whole Armour of God</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: full-height 3D stage with a rail of the six pieces, scripture study panel on the right (stacked on phones). Single night look. */
+:root{
+  --night:#090d1a;
+  --panel:#0e1427;
+  --fg:#ece8df;
+  --muted:#9aa4bd;
+  --line:rgba(190,205,240,.12);
+  --gold:#f0c674;
+  --pearl:#bcd6ff;
+  --ember:#ff9a5a;
+  --sans:"Google Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--night);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.55;overflow:hidden}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 410px;height:100%}
+.stage{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--night)}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px;pointer-events:none}
+.brand .ref{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.brand h1{font-weight:500;font-size:24px;line-height:1.05;margin:4px 0 0;text-wrap:balance}
+.views{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;pointer-events:auto;max-width:360px}
+.chip{font:500 12px/1 var(--sans);color:var(--muted);background:rgba(14,20,39,.6);border:1px solid var(--line);border-radius:999px;padding:7px 11px;cursor:pointer;backdrop-filter:blur(6px)}
+.chip:hover{color:var(--fg)}
+.chip[aria-pressed="true"]{color:var(--fg);border-color:rgba(236,232,223,.4)}
+
+.rail{position:absolute;left:20px;top:50%;transform:translateY(-46%);display:flex;flex-direction:column;gap:6px}
+.piece{display:grid;grid-template-columns:22px auto;align-items:center;gap:2px 8px;text-align:left;font-family:var(--sans);color:var(--fg);background:rgba(14,20,39,.7);border:1px solid var(--line);border-radius:12px;padding:7px 12px 7px 9px;cursor:pointer;backdrop-filter:blur(8px);transition:border-color .2s, background .2s}
+.piece i{grid-row:span 2;font-style:normal;font-size:11px;font-weight:600;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.piece b{font-weight:600;font-size:13.5px;line-height:1.2}
+.piece span{font-size:11.5px;color:var(--muted);line-height:1.2}
+.piece:hover{border-color:rgba(240,198,116,.4)}
+.piece[aria-pressed="true"]{background:rgba(40,36,30,.85);border-color:var(--gold)}
+.piece[aria-pressed="true"] i{color:var(--gold)}
+
+.modes{position:absolute;left:0;right:0;bottom:0;padding:14px 20px 18px;display:flex;gap:8px;overflow-x:auto;justify-content:center}
+.mode{flex:0 0 auto;text-align:left;font-family:var(--sans);color:var(--fg);background:rgba(14,20,39,.7);border:1px solid var(--line);border-radius:12px;padding:9px 14px;cursor:pointer;backdrop-filter:blur(8px);transition:border-color .2s, background .2s}
+.mode b{display:block;font-weight:600;font-size:14px}
+.mode span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+.mode:hover{border-color:rgba(236,232,223,.3)}
+.mode[aria-pressed="true"]{background:rgba(30,38,70,.85);border-color:var(--c, rgba(236,232,223,.55));box-shadow:0 0 0 1px var(--c, transparent) inset}
+.mode[data-k="whole"]{--c:var(--gold)}
+.mode[data-k="pray"]{--c:var(--pearl)}
+.hint{position:absolute;right:20px;bottom:86px;font-size:12px;color:var(--muted);pointer-events:none;text-align:right}
+
+.labels{position:absolute;inset:0;pointer-events:none}
+.tag{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-size:12px;font-weight:500;letter-spacing:.02em;padding:3px 9px;border-radius:999px;transition:opacity .35s;opacity:0;color:var(--night);background:var(--gold)}
+.tag.base{font-size:14px;color:var(--fg);background:none;padding:0}
+.tag.base small{display:block;text-align:center;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+
+.panel{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;min-height:0;padding-block:28px 40px;padding-left:max(26px, env(safe-area-inset-left,0px));padding-right:max(26px, env(safe-area-inset-right,0px))}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.panel h2{font-weight:500;font-size:32px;line-height:1.05;margin:6px 0 4px;text-wrap:balance}
+.role{margin:0 0 18px;font-size:14px;color:var(--accent, var(--fg))}
+.kjv{margin:0 0 18px;padding:16px 18px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:17px;line-height:1.5}
+.kjv p{margin:0}
+.kjv p+p{margin-top:8px}
+.vn{font-size:11px;font-weight:600;color:var(--accent, var(--muted));vertical-align:super;margin-right:4px}
+.kjv cite{display:block;margin-top:10px;font:500 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-style:normal}
+.lead{margin:0 0 18px}
+.soldier{margin:0 0 6px;padding:14px 16px;border-radius:12px;border:1px dashed rgba(240,198,116,.35);background:rgba(240,198,116,.04)}
+.soldier h4{margin:0 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.soldier p{margin:0;color:#d4d6dd;font-size:14px}
+.soldier dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:10px 0 0;font-size:12.5px}
+.soldier dt{color:var(--muted)}
+.soldier dd{margin:0;color:var(--fg)}
+.panel h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:26px 0 10px}
+.points{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.points li{padding-left:14px;border-left:2px solid var(--accent, var(--line))}
+.points strong{display:block;font-weight:600}
+.points span{color:#c9cdd8}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+.cards button{text-align:left;font-family:var(--sans);color:var(--fg);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.cards button:hover{border-color:rgba(240,198,116,.5)}
+.cards em{display:block;font-style:normal;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cards b{display:block;font-size:15px;font-weight:500;margin-top:2px}
+.cards span{font-size:12px;color:var(--gold)}
+.support{display:grid;gap:12px}
+.support div{font-size:15px;line-height:1.5;color:#c9cdd8}
+.support cite{display:block;font:600 11.5px/1.3 var(--sans);font-style:normal;color:var(--muted);margin-bottom:3px;letter-spacing:.03em}
+.passage{font-size:14.5px;line-height:1.6}
+.passage span{color:rgba(236,232,223,.38);transition:color .3s}
+.passage span.on{color:var(--fg)}
+.passage span.on .vn{color:var(--accent, var(--gold))}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td:first-child{white-space:nowrap;color:var(--muted);font-variant-numeric:tabular-nums}
+.take{margin-top:22px;padding:16px 18px;border-radius:12px;border:1px solid rgba(240,198,116,.35);font-size:17px;line-height:1.45}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:58% 42%}
+  .panel{border-left:0;border-top:1px solid var(--line);padding-block:20px 32px;padding-left:max(18px, env(safe-area-inset-left,0px));padding-right:max(18px, env(safe-area-inset-right,0px))}
+  .top{flex-direction:column;padding:14px 16px}
+  .brand h1{font-size:22px}
+  .views{justify-content:flex-start}
+  .rail{top:auto;bottom:62px;left:0;right:0;transform:none;flex-direction:row;overflow-x:auto;padding:0 16px}
+  .piece{flex:0 0 auto}
+  .modes{justify-content:flex-start;padding:8px 16px 12px}
+  .mode{padding:7px 11px}
+  .hint{display:none}
+  .panel h2{font-size:28px}
+}
+@media (max-width:420px){.views .chip.opt{display:none}}
+@media (prefers-reduced-motion: reduce){.tag,.mode,.piece{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section class="stage" id="stage" aria-label="3D figure wearing the armour of God">
+    <div class="labels" id="labels"></div>
+    <div class="top">
+      <div class="brand">
+        <div class="ref">Ephesians 6:10–20 · KJV</div>
+        <h1>The Whole Armour of God</h1>
+      </div>
+      <div class="views" role="group" aria-label="Viewpoint">
+        <button class="chip" data-view="front" aria-pressed="false">Front</button>
+        <button class="chip" data-view="three" aria-pressed="false">Turned</button>
+        <button class="chip opt" data-view="side" aria-pressed="false">Side</button>
+        <button class="chip opt" data-view="above" aria-pressed="false">From above</button>
+      </div>
+    </div>
+    <div class="rail" role="group" aria-label="The six pieces">
+      <button class="piece" data-k="truth"><i>14</i><b>Girdle</b><span>of truth</span></button>
+      <button class="piece" data-k="righteousness"><i>14</i><b>Breastplate</b><span>of righteousness</span></button>
+      <button class="piece" data-k="peace"><i>15</i><b>Shoes</b><span>the gospel of peace</span></button>
+      <button class="piece" data-k="faith"><i>16</i><b>Shield</b><span>of faith</span></button>
+      <button class="piece" data-k="salvation"><i>17</i><b>Helmet</b><span>of salvation</span></button>
+      <button class="piece" data-k="word"><i>17</i><b>Sword</b><span>of the Spirit</span></button>
+    </div>
+    <div class="hint">Drag to turn · scroll to zoom<br>tap any piece of armour</div>
+    <div class="modes" role="group" aria-label="Sections">
+      <button class="mode" data-k="strong"><b>Be strong</b><span>vv. 10–13</span></button>
+      <button class="mode" data-k="whole"><b>Put on the whole armour</b><span>vv. 13–17</span></button>
+      <button class="mode" data-k="pray"><b>Praying always</b><span>vv. 18–20</span></button>
+    </div>
+  </section>
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { MarchingCubes } from 'three/addons/objects/MarchingCubes.js';
+
+/* ---------------- Content ---------------- */
+const KJV = {
+  10:"Finally, my brethren, be strong in the Lord, and in the power of his might.",
+  11:"Put on the whole armour of God, that ye may be able to stand against the wiles of the devil.",
+  12:"For we wrestle not against flesh and blood, but against principalities, against powers, against the rulers of the darkness of this world, against spiritual wickedness in high places.",
+  13:"Wherefore take unto you the whole armour of God, that ye may be able to withstand in the evil day, and having done all, to stand.",
+  14:"Stand therefore, having your loins girt about with truth, and having on the breastplate of righteousness;",
+  15:"And your feet shod with the preparation of the gospel of peace;",
+  16:"Above all, taking the shield of faith, wherewith ye shall be able to quench all the fiery darts of the wicked.",
+  17:"And take the helmet of salvation, and the sword of the Spirit, which is the word of God:",
+  18:"Praying always with all prayer and supplication in the Spirit, and watching thereunto with all perseverance and supplication for all saints;",
+  19:"And for me, that utterance may be given unto me, that I may open my mouth boldly, to make known the mystery of the gospel,",
+  20:"For which I am an ambassador in bonds: that therein I may speak boldly, as I ought to speak."
+};
+const GOLD='#f0c674', PEARL='#bcd6ff';
+const PIECES=['truth','righteousness','peace','faith','salvation','word'];
+
+const C = {
+  strong:{
+    eyebrow:"Ephesians 6:10–13", title:"Be Strong in the Lord", role:"The armour is God's, and he provides every piece",
+    quote:[10,11], verses:[10,11,12,13],
+    lead:"Paul turns from our relationships with people to the spiritual battle every Christian faces. The armour waits beside the soldier: God has provided all of it, and the believer is told to put it on.",
+    points:[
+      ["In the Lord, not in ourselves (v. 10)","Paul does not say, be strong in yourself. Our confidence rests in how powerful God is, not in how strong we are."],
+      ["The whole armour of God (v. 11)","It is God's armour, not man's. Human strength and worldly methods cannot overcome spiritual opposition."],
+      ["The wiles of the devil (v. 11)","His schemes, tricks and deceptions. We are to stand against them, neither ignorant of them nor careless."],
+      ["Not flesh and blood (v. 12)","Our ultimate enemy is not another person. People may oppose us, but the deeper battle is spiritual."],
+      ["Having done all, to stand (v. 13)","The aim is not to seek a fight or show off our strength. It is to stay faithful to God and not be moved from the truth."]
+    ],
+    supports:[
+      ["Philippians 4:13","I can do all things through Christ which strengtheneth me."],
+      ["2 Corinthians 12:9","And he said unto me, My grace is sufficient for thee: for my strength is made perfect in weakness."],
+      ["2 Corinthians 11:3","But I fear, lest by any means, as the serpent beguiled Eve through his subtilty, so your minds should be corrupted from the simplicity that is in Christ."]
+    ],
+    light:{explode:1, pieces:.3, body:.18, pray:0}, view:'wide'
+  },
+  whole:{
+    eyebrow:"Ephesians 6:13–17", title:"The Whole Armour", role:"Six pieces, worn together",
+    quote:[13], verses:[13,14,15,16,17],
+    lead:"Paul repeats the word whole. No piece is optional, and none works alone. Choose a piece to see the Roman equipment behind it and what it teaches.",
+    cards:true,
+    points:[
+      ["God's own armour","Paul draws on Isaiah, where the LORD himself puts on righteousness as a breastplate and an helmet of salvation (Isaiah 59:17). The believer wears what God provides."],
+      ["Five pieces protect","The girdle, breastplate, shoes, shield and helmet guard the soldier."],
+      ["One is named the sword","The sword of the Spirit is the word of God."],
+      ["Neglect none","Paul repeatedly emphasises the whole armour."]
+    ],
+    table:true,
+    supports:[
+      ["Isaiah 59:17","For he put on righteousness as a breastplate, and an helmet of salvation upon his head…"],
+      ["Romans 13:12","The night is far spent, the day is at hand: let us therefore cast off the works of darkness, and let us put on the armour of light."]
+    ],
+    light:{explode:0, pieces:.68, body:.18, pray:0}, view:'front'
+  },
+  truth:{
+    eyebrow:"Ephesians 6:14", title:"The Girdle of Truth", role:"Loins girt about with truth",
+    quote:[14], verses:[14],
+    soldier:{name:"Cingulum · the military belt",
+      text:"A Roman soldier's belt was faced with bronze or silver plates. In Paul's day a short apron of leather straps, studded with metal and ending in pendants, often hung from it at the front. The belt held his equipment in place and marked him as a soldier on duty. To gird the loins was to gather the long tunic up into the belt, ready to move.",
+      facts:[["Greek","perizōsamenoi, having girded"],["Made of","leather, bronze or silver plates"],["Shown here","belt with a studded apron"]]},
+    points:[
+      ["Know the truth","Christians must know, believe and live according to God's truth."],
+      ["It holds the rest together","As the belt secured a soldier's clothing and equipment, truth secures everything else."],
+      ["Not led astray","We must not be led astray by lies, false teaching or deception."]
+    ],
+    supports:[
+      ["John 17:17","Sanctify them through thy truth: thy word is truth."],
+      ["Isaiah 11:5","And righteousness shall be the girdle of his loins, and faithfulness the girdle of his reins."],
+      ["1 Peter 1:13","Wherefore gird up the loins of your mind, be sober, and hope to the end…"]
+    ],
+    light:{focus:'truth'}, view:'truth'
+  },
+  righteousness:{
+    eyebrow:"Ephesians 6:14", title:"The Breastplate of Righteousness", role:"Guarding the heart",
+    quote:[14], verses:[14],
+    soldier:{name:"Lorica · body armour",
+      text:"The breastplate covered the heart, lungs and other vital organs. In the mid first century many legionaries wore a mail shirt (lorica hamata) of thousands of iron rings. Plate armour of overlapping iron bands, the lorica segmentata shown here, was also in use: pieces survive from Kalkriese in Germany (AD 9) and later examples from Corbridge in England.",
+      facts:[["Greek","thōrax, breastplate"],["Made of","iron bands on leather straps, or iron mail"],["Shown here","segmented plate with shoulder guards"]]},
+    points:[
+      ["Justified by faith","We are declared righteous through faith in Christ (Romans 5:1)."],
+      ["Live righteously","We should also live righteously in our daily conduct."],
+      ["Guard the heart","We cannot knowingly continue in sin and expect to stand firmly in the Lord."]
+    ],
+    supports:[
+      ["Isaiah 59:17","For he put on righteousness as a breastplate…"],
+      ["Philippians 3:9","And be found in him, not having mine own righteousness, which is of the law, but that which is through the faith of Christ, the righteousness which is of God by faith:"],
+      ["Romans 6:13","…yield yourselves unto God, as those that are alive from the dead, and your members as instruments of righteousness unto God."]
+    ],
+    light:{focus:'righteousness'}, view:'righteousness'
+  },
+  peace:{
+    eyebrow:"Ephesians 6:15", title:"Shod with the Gospel of Peace", role:"Feet ready and steady",
+    quote:[15], verses:[15],
+    soldier:{name:"Caligae · hobnailed sandal-boots",
+      text:"Roman soldiers wore caligae: heavy leather sandal-boots with an open lattice upper, laced up over the ankle. Iron hobnails studded the thick soles, giving grip on rough ground so a soldier could march long distances and keep his footing in battle.",
+      facts:[["Greek","hypodēsamenoi, having bound on"],["Made of","leather, iron hobnails"],["Shown here","laced boots with hobnailed soles"]]},
+    points:[
+      ["Steady and ready","A soldier needed suitable footwear to stay steady and ready to move."],
+      ["Peace with God","The gospel gives believers peace with God through Jesus Christ (Romans 5:1)."],
+      ["Prepared to share","We should stand firm in the gospel and be ready to share its message."]
+    ],
+    supports:[
+      ["Isaiah 52:7","How beautiful upon the mountains are the feet of him that bringeth good tidings, that publisheth peace…"],
+      ["Romans 10:15","…How beautiful are the feet of them that preach the gospel of peace, and bring glad tidings of good things!"],
+      ["1 Peter 3:15","…be ready always to give an answer to every man that asketh you a reason of the hope that is in you with meekness and fear:"]
+    ],
+    light:{focus:'peace'}, view:'peace'
+  },
+  faith:{
+    eyebrow:"Ephesians 6:16", title:"The Shield of Faith", role:"Quenching the fiery darts",
+    quote:[16], verses:[16],
+    soldier:{name:"Scutum · the large curved shield",
+      text:"Paul's word thureos means a large door-shaped shield. The Roman scutum stood about 1.2 metres tall and curved to wrap around the body. It was made of layers of wood, covered in leather, and fitted with a central iron or bronze boss. Burning arrows were a real weapon of the day; a covered shield could catch them and stop the fire. The embers flying at the shield picture the fiery darts of the wicked.",
+      facts:[["Greek","thureos, door-shaped shield"],["Made of","layered wood, leather, iron boss"],["Shown here","curved scutum with its boss"]]},
+    points:[
+      ["Trust what God has said","Faith means trusting God and believing what he has said, even when we face temptation, fear, doubt or discouragement."],
+      ["Quench every dart","The devil's attacks should not cause us to abandon our trust in God."]
+    ],
+    supports:[
+      ["1 Peter 5:8–9","Be sober, be vigilant; because your adversary the devil, as a roaring lion, walketh about, seeking whom he may devour: Whom resist stedfast in the faith…"],
+      ["1 John 5:4","…and this is the victory that overcometh the world, even our faith."],
+      ["Proverbs 30:5","Every word of God is pure: he is a shield unto them that put their trust in him."]
+    ],
+    light:{focus:'faith', darts:1}, view:'faith'
+  },
+  salvation:{
+    eyebrow:"Ephesians 6:17", title:"The Helmet of Salvation", role:"Protecting the head",
+    quote:[17], verses:[17],
+    soldier:{name:"Galea · the legionary helmet",
+      text:"The helmet of Paul's day was an iron or bronze bowl with a ridge across the brow, a deep guard over the back of the neck, and hinged cheek pieces on each side. It protected the head, where a single blow could be fatal.",
+      facts:[["Greek","perikephalaia, helmet"],["Made of","iron or bronze"],["Shown here","bowl, brow ridge, neck guard, cheek pieces"]]},
+    points:[
+      ["Assurance","Salvation gives believers assurance and confidence in what Christ has done for them."],
+      ["Christ's work, not ours","Our salvation is through Jesus Christ, not our own good works."],
+      ["The hope of salvation","Paul elsewhere calls the helmet the hope of salvation (1 Thessalonians 5:8)."]
+    ],
+    supports:[
+      ["1 Thessalonians 5:8","But let us, who are of the day, be sober, putting on the breastplate of faith and love; and for an helmet, the hope of salvation."],
+      ["1 Thessalonians 5:9","For God hath not appointed us to wrath, but to obtain salvation by our Lord Jesus Christ,"],
+      ["Ephesians 2:8–9","For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast."]
+    ],
+    light:{focus:'salvation'}, view:'salvation'
+  },
+  word:{
+    eyebrow:"Ephesians 6:17", title:"The Sword of the Spirit", role:"Which is the word of God",
+    quote:[17], verses:[17],
+    soldier:{name:"Gladius · the short sword",
+      text:"Paul's word machaira means a short sword. The Roman gladius of the Pompeii type, common in his day, had a straight double-edged blade about 50 centimetres long with a short triangular point, made for close combat. The hilt had a guard, a ridged grip and a round pommel, and the sword was worn on the right side.",
+      facts:[["Greek","machaira, short sword"],["Made of","iron blade, bone or wood hilt"],["Shown here","Pompeii-type gladius"]]},
+    points:[
+      ["The word of God","The sword represents the Word of God. We must know Scripture, believe it and use it rightly."],
+      ["It is written","Jesus answered Satan's temptations with Scripture (Matthew 4:1–11)."],
+      ["Spoken and used","Paul's Greek word for word here is rhēma: God's word spoken and applied."],
+      ["The piece named as the sword","Unlike the other pieces, this is the one Paul identifies as the sword."]
+    ],
+    supports:[
+      ["Hebrews 4:12","For the word of God is quick, and powerful, and sharper than any twoedged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart."],
+      ["Matthew 4:4","…It is written, Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God."],
+      ["2 Timothy 3:16–17","All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness: That the man of God may be perfect, throughly furnished unto all good works."]
+    ],
+    light:{focus:'word'}, view:'word'
+  },
+  pray:{
+    eyebrow:"Ephesians 6:18–20", title:"Praying Always", role:"Not a seventh piece, but essential", accent:PEARL,
+    quote:[18], verses:[18,19,20],
+    lead:"Paul does not end with the armour. Light falls on the whole soldier: the armour is worn in dependence on God, through prayer.",
+    points:[
+      ["Praying always","Keep a life of prayer."],
+      ["With all prayer and supplication","Bring our requests and needs before God."],
+      ["In the Spirit","Pray in dependence on the Holy Spirit, in line with God's will."],
+      ["Watching thereunto","Stay alert and spiritually watchful."],
+      ["With all perseverance","Keep praying and do not give up."],
+      ["For all saints","Pray for other believers, not only ourselves."],
+      ["Boldness (vv. 19–20)","Paul asks for boldness to preach the gospel, not the removal of his chains. Even in bonds he is an ambassador for Christ."]
+    ],
+    supports:[
+      ["1 Thessalonians 5:17","Pray without ceasing."],
+      ["Colossians 4:2","Continue in prayer, and watch in the same with thanksgiving;"]
+    ],
+    light:{explode:0, pieces:.4, body:1, pray:1}, view:'front'
+  }
+};
+const SHORT = {truth:["Girdle","truth"],righteousness:["Breastplate","righteousness"],peace:["Shoes","gospel of peace"],faith:["Shield","faith"],salvation:["Helmet","salvation"],word:["Sword","the word of God"]};
+
+/* ---------------- Panel ---------------- */
+const panel=document.getElementById('panel');
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function render(k){
+  const d=C[k];
+  if(d.accent) panel.style.setProperty('--accent',d.accent); else panel.style.setProperty('--accent',GOLD);
+  const quote=d.quote.map(v=>`<p><span class="vn">${v}</span>${esc(KJV[v])}</p>`).join('');
+  let h=`<div class="eyebrow">${d.eyebrow}</div><h2>${d.title}</h2><p class="role">${d.role}</p>
+    <blockquote class="kjv">${quote}<cite>Ephesians 6:${d.quote.length>1?d.quote[0]+'–'+d.quote.at(-1):d.quote[0]}</cite></blockquote>`;
+  if(d.lead) h+=`<p class="lead">${esc(d.lead)}</p>`;
+  if(d.soldier){
+    h+=`<div class="soldier"><h4>The Roman soldier's ${esc(SHORT[k][0].toLowerCase())}</h4><p><b>${esc(d.soldier.name)}.</b> ${esc(d.soldier.text)}</p>
+      <dl>${d.soldier.facts.map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)}</dd>`).join('')}</dl></div><h3>What it teaches</h3>`;
+  }
+  if(d.cards) h+=`<div class="cards">${PIECES.map(p=>`<button data-go="${p}"><em>v. ${C[p].eyebrow.split(':')[1]}</em><b>${SHORT[p][0]}</b><span>${SHORT[p][1]}</span></button>`).join('')}</div><h3>What Paul is saying</h3>`;
+  h+=`<ul class="points">${d.points.map(([t,s])=>`<li><strong>${esc(t)}</strong><span>${esc(s)}</span></li>`).join('')}</ul>`;
+  if(d.table){
+    h+=`<h3>At a glance</h3><div class="tablewrap"><table><thead><tr><th>Verse</th><th>Piece</th><th>Roman gear</th><th>Pictures</th></tr></thead><tbody>
+      <tr><td>14</td><td>Girdle</td><td>Cingulum</td><td>Truth</td></tr>
+      <tr><td>14</td><td>Breastplate</td><td>Lorica</td><td>Righteousness</td></tr>
+      <tr><td>15</td><td>Shoes</td><td>Caligae</td><td>Gospel of peace</td></tr>
+      <tr><td>16</td><td>Shield</td><td>Scutum</td><td>Faith</td></tr>
+      <tr><td>17</td><td>Helmet</td><td>Galea</td><td>Salvation</td></tr>
+      <tr><td>17</td><td>Sword</td><td>Gladius</td><td>The word of God</td></tr>
+    </tbody></table></div>
+    <div class="take">We cannot live the Christian life in our own strength. We must depend on the Lord, put on his whole armour, know his Word and continue in prayer.</div>`;
+  }
+  h+=`<h3>Supporting verses</h3><div class="support">${d.supports.map(([r,t])=>`<div><cite>${r}</cite>${esc(t)}</div>`).join('')}</div>`;
+  h+=`<h3>In the passage</h3><div class="passage">${Object.keys(KJV).map(v=>`<span class="${d.verses.includes(+v)?'on':''}"><span class="vn">${v}</span>${esc(KJV[v])} </span>`).join('')}</div>`;
+  panel.innerHTML=h; panel.scrollTop=0;
+}
+panel.addEventListener('click',e=>{const b=e.target.closest('[data-go]'); if(b) select(b.dataset.go);});
+
+/* ---------------- Mode state ---------------- */
+let current='strong';
+const modeBtns=[...document.querySelectorAll('.mode')], pieceBtns=[...document.querySelectorAll('.piece')];
+function select(k,fromHash){
+  if(!C[k]) k='strong';
+  current=k;
+  modeBtns.forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  pieceBtns.forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  render(k);
+  if(window.__onSelect) window.__onSelect(k);
+  if(!fromHash){ try{ history.replaceState(null,'','#'+k); }catch(e){} }
+}
+[...modeBtns,...pieceBtns].forEach(b=>b.addEventListener('click',()=>select(b.dataset.k)));
+window.addEventListener('hashchange',()=>select(location.hash.slice(1),true));
+select(location.hash.slice(1)||'strong',true);
+
+/* ---------------- 3D setup ---------------- */
+const stage=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'}); }
+catch(e){ stage.insertAdjacentHTML('afterbegin','<div class="nogl">This browser could not start 3D graphics. The study notes on the side still work.</div>'); throw e; }
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+stage.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color('#090d1a');
+const camera=new THREE.PerspectiveCamera(34,1,.05,100);
+camera.position.set(1.6,1.4,4.4);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.target.set(0,1,0); controls.enableDamping=true; controls.minDistance=.9; controls.maxDistance=10;
+controls.maxPolarAngle=Math.PI*.62; controls.enablePan=false;
+const shared={uTime:{value:0}};
+
+{ // background dome
+  const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,
+    uniforms:{a:{value:new THREE.Color('#05070f')},b:{value:new THREE.Color('#1a2247')}},
+    vertexShader:`varying vec3 p; void main(){p=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform vec3 a,b; varying vec3 p; void main(){ float t=smoothstep(-.2,.6,p.y); float h=exp(-pow(p.y*3.,2.))*.35; gl_FragColor=vec4(mix(a,b,t*.6)+b*h,1.);}`});
+  const s=new THREE.Mesh(new THREE.SphereGeometry(40,32,16),m); s.renderOrder=-10; scene.add(s);
+}
+function pointsMat(color){
+  return new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    uniforms:{uTime:shared.uTime,uPix:{value:renderer.getPixelRatio()*90},uAmt:{value:1},uColor:{value:new THREE.Color(color)},uDrift:{value:0},uTop:{value:4.2}},
+    vertexShader:`attribute float aPhase; attribute float aSize; uniform float uTime,uPix,uAmt,uDrift,uTop; varying float vA;
+      void main(){ vec3 p=position; p.y=mod(p.y+uTime*uDrift*(.5+fract(aPhase)),uTop)-.3;
+        vec4 mv=modelViewMatrix*vec4(p,1.); gl_Position=projectionMatrix*mv; gl_PointSize=aSize*uPix/-mv.z;
+        vA=uAmt*(.45+.55*sin(uTime*1.3+aPhase*6.283)); }`,
+    fragmentShader:`uniform vec3 uColor; varying float vA; void main(){ float d=length(gl_PointCoord-.5); float a=smoothstep(.5,0.,d); gl_FragColor=vec4(uColor,a*a*vA);}`});
+}
+{ // dust
+  const N=700,pos=new Float32Array(N*3),ph=new Float32Array(N),sz=new Float32Array(N);
+  for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*12;pos[i*3+1]=Math.random()*4.2-.3;pos[i*3+2]=(Math.random()-.5)*8-1;ph[i]=Math.random();sz[i]=.5+Math.random()*1.2;}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aPhase',new THREE.BufferAttribute(ph,1));g.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
+  const m=pointsMat('#8fa6d8'); m.uniforms.uAmt.value=.28; m.uniforms.uDrift.value=reduced?0:.05;
+  const p=new THREE.Points(g,m); p.renderOrder=-5; scene.add(p);
+}
+
+/* ---------------- Shapes (distance fields in pictogram px; 1px = 6mm) ---------------- */
+const PX=.006;
+const smin=(a,b,k)=>{const h=Math.max(k-Math.abs(a-b),0)/k; return Math.min(a,b)-h*h*k*.25;};
+const smax=(a,b,k)=>-smin(-a,-b,k);
+const rb2=(px,py,cx,cy,bx,by,r)=>{const qx=Math.abs(px-cx)-bx+r,qy=Math.abs(py-cy)-by+r; return Math.hypot(Math.max(qx,0),Math.max(qy,0))+Math.min(Math.max(qx,qy),0)-r;};
+const rb3=(px,py,pz,cx,cy,cz,bx,by,bz,r)=>{const qx=Math.abs(px-cx)-bx+r,qy=Math.abs(py-cy)-by+r,qz=Math.abs(pz-cz)-bz+r; return Math.hypot(Math.max(qx,0),Math.max(qy,0),Math.max(qz,0))+Math.min(Math.max(qx,Math.max(qy,qz)),0)-r;};
+const ell=(px,py,pz,cx,cy,cz,rx,ry,rz)=>{const x=(px-cx)/rx,y=(py-cy)/ry,z=(pz-cz)/rz; return (Math.hypot(x,y,z)-1)*Math.min(rx,ry,rz);};
+const cap=(px,py,pz,a,b,r)=>{const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],qx=px-a[0],qy=py-a[1],qz=pz-a[2];
+  const t=Math.max(0,Math.min(1,(qx*dx+qy*dy+qz*dz)/(dx*dx+dy*dy+dz*dz))); return Math.hypot(qx-dx*t,qy-dy*t,qz-dz*t)-r;};
+const rext=(d2,z,R)=>{const a=d2+R,b=Math.abs(z); return Math.hypot(Math.max(a,0),b)+Math.min(Math.max(a,b),0)-R;}; // round a 2D shape into 3D
+
+/* the body outline: the 2D pictogram, softened */
+let _od=null; const OD={x0:-72,y0:-12,w:145,h:270};
+function outlineDepth(x,y){
+  if(!_od){
+    const raw=new Float32Array(OD.w*OD.h);
+    for(let j=0;j<OD.h;j++) for(let i=0;i<OD.w;i++){
+      const X=Math.abs(OD.x0+i),Y=OD.y0+j;
+      let d=rb2(X,Y,0,210,62,32,32);
+      d=smin(d,rb2(X,Y,52,162,10,49,10),5);
+      let t=rb2(X,Y,0,183.5,33,58.5,0);
+      t=smin(t,rb2(X,Y,19,71,14.5,71,14.5),5);
+      const slit=rb2(X,Y,37.5,150,4.5,52,4.5);
+      raw[i+j*OD.w]=Math.max(Math.min(d,t),-slit);
+    }
+    let a=raw,b=new Float32Array(raw.length); const r=3;
+    for(let pass=0;pass<5;pass++){
+      for(let j=0;j<OD.h;j++) for(let i=0;i<OD.w;i++){let s=0,n=0; for(let k=-r;k<=r;k++){const ii=i+k; if(ii<0||ii>=OD.w) continue; s+=a[ii+j*OD.w]; n++;} b[i+j*OD.w]=s/n;}
+      for(let j=0;j<OD.h;j++) for(let i=0;i<OD.w;i++){let s=0,n=0; for(let k=-r;k<=r;k++){const jj=j+k; if(jj<0||jj>=OD.h) continue; s+=b[i+jj*OD.w]; n++;} a[i+j*OD.w]=s/n;}
+    }
+    _od=a;
+  }
+  const fx=Math.min(Math.max(x-OD.x0,0),OD.w-1.001),fy=Math.min(Math.max(y-OD.y0,0),OD.h-1.001);
+  const i=fx|0,j=fy|0,u=fx-i,v=fy-j,g=_od,W=OD.w;
+  return (g[i+j*W]*(1-u)+g[i+1+j*W]*u)*(1-v)+(g[i+(j+1)*W]*(1-u)+g[i+1+(j+1)*W]*u)*v;
+}
+const bodyOnly=(x,y,z)=>rext(outlineDepth(x,y),z,8.5);
+const figureSDF=(x,y,z)=>Math.min(bodyOnly(x,y,z),Math.hypot(x,y-279,z)-25);
+
+/* 1. girdle: belt over the breastplate's lower edge, with a studded apron of four straps */
+function girdleSDF(x,y,z){
+  const X=Math.abs(x);
+  let d=smax(bodyOnly(x,y,z)-6, Math.abs(y-146)-5, 2);
+  d=smax(d, X-37, 2);
+  for(const px of [-24,-12,0,12,24]) d=smin(d, rb3(x,y,z,px,146,14,4.5,4.2,2.2,1.6), 1.2);   // belt plates
+  for(const sx of [-9,-3,3,9]){
+    d=smin(d, cap(x,y,z,[sx,142,14.5],[sx,94,17],1.7), 1.2);                                 // strap
+    for(const sy of [132,122,112,102]) d=smin(d, Math.hypot(x-sx,y-sy,z-(14.5+2.5*(142-sy)/48))-2.3, 1);  // studs
+    d=smin(d, ell(x,y,z,sx,89.5,17.2,2.7,4.4,2.4), 1);                                       // pendant
+  }
+  return d;
+}
+/* 2. breastplate: lorica segmentata, following the body with girth bands and shoulder guards */
+function breastSDF(x,y,z){
+  const X=Math.abs(x);
+  const mask=Math.min(rb2(X,y,0,194,41,54,12), rb2(X,y,50,216,18,24,16));
+  let d=smax(bodyOnly(x,y,z)-3.6, mask, 3);
+  if(y<207){ const u=((y-146)%12+12)%12, b=Math.min(u,12-u); d+=0.85*Math.exp(-b*b/1.3); }      // girth bands
+  if(y<207) d+=0.6*Math.exp(-x*x/1.1);                                                       // front closure
+  if(X>36){ const u=((y-206)%9+9)%9, b=Math.min(u,9-u); d+=0.6*Math.exp(-b*b/1.0); }          // shoulder lames
+  return d;
+}
+/* 3. caligae: laced, hobnailed sandal-boots */
+function shoesSDF(x,y,z){
+  const X=Math.abs(x);
+  let d=rb3(X,y,z,19,15,1,17.5,15,13,11);
+  d=smin(d, rb3(X,y,z,19,6.5,17,15.5,6.5,12.5,6.5), 6);
+  d=Math.min(d, rb3(X,y,z,19,1.8,9,18,1.8,21,1.8));               // sole
+  const lace=[11,18,25].reduce((m,c)=>Math.min(m,Math.abs(y-c)),9);
+  if(y>8) d-=0.7*Math.exp(-lace*lace/1.4);                         // raised straps
+  return d;
+}
+/* 4. scutum: curved rectangular shield with a boss; local frame, face toward +z */
+function shieldSDF(x,y,z){
+  const Rc=100, zz=z+Rc, rad=Math.hypot(x,zz), s=Rc*Math.atan2(x,zz);
+  let d=rext(rb2(s,y,0,0,55,95,16), rad-Rc, 4.5);
+  const rim=Math.abs(rb2(s,y,0,0,55,95,16)+3);
+  d-=0.9*Math.exp(-rim*rim/2);                                      // edge binding
+  d=smin(d, rb3(x,y,z,0,0,3,16,16,3,3), 2);                         // boss plate
+  d=smin(d, Math.hypot(x,y,z-2)-13, 2);                              // boss (umbo)
+  return d;
+}
+/* 5. galea: Imperial Gallic helmet, in body coordinates over the head */
+function helmetSDF(x,y,z){
+  let d=Math.hypot(x,y-280,z)-28.5;
+  d=smax(d, (262+0.78*Math.max(z,0))-y, 2.5);                       // face opening at the front
+  d=smin(d, ell(x,y,z,0,262,-20,27,4.6,16), 3);                     // neck guard
+  d=smin(d, smax(Math.hypot(Math.hypot(x,z)-28,y-286.5)-2.5, 3-z, 2), 1.5);   // brow ridge
+  d=smin(d, rb3(Math.abs(x),y,z,25.5,266,7,3.2,13,10,3.2), 2);      // cheek pieces
+  d=smin(d, Math.hypot(x,y-309,z)-3.6, 2);                           // crest knob
+  return d;
+}
+/* 6. gladius, Pompeii type; local frame, grip at origin, blade down */
+function swordSDF(x,y,z){
+  const w = y>-84 ? 4.3 : 4.3*Math.max(0,(y+95)/11);
+  const blade2=Math.max(Math.abs(x)-w, y+9, -95-y);
+  let d=rext(blade2, z, 1.6);
+  d=Math.min(d, smax(Math.hypot(x,z)-(3.2+0.45*Math.cos(y*1.2)), Math.abs(y-3.5)-7.5, 1)); // ridged grip
+  d=smin(d, ell(x,y,z,0,-7,0,8.5,3.6,5.8), 1.5);                    // guard
+  d=smin(d, ell(x,y,z,0,15.5,0,6.5,4.5,6), 1.5);                    // pommel
+  return d;
+}
+
+/* mesh a distance field with marching cubes inside a box (px) */
+const dummy=new THREE.MeshBasicMaterial();
+function buildMesh(sdf,c,h,R){
+  const S=Math.max(h[0],h[1],h[2])*1.06, half=R/2, size2=R*R, k=6*R/S;
+  const mc=new MarchingCubes(R,dummy,false,false,R>150?320000:220000);
+  const f=mc.field; f.fill(-1000);
+  for(let kk=0;kk<R;kk++){ const lz=(kk-half)/half*S; if(Math.abs(lz)>h[2]) continue; const z=c[2]+lz;
+    for(let j=0;j<R;j++){ const ly=(j-half)/half*S; if(Math.abs(ly)>h[1]) continue; const y=c[1]+ly;
+      for(let i=0;i<R;i++){ const lx=(i-half)/half*S; if(Math.abs(lx)>h[0]) continue;
+        f[i+j*R+kk*size2]=80-sdf(c[0]+lx,y,z)*k; } } }
+  mc.isolation=80; mc.update();
+  const n=mc.count,g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(mc.positionArray.slice(0,n*3),3));
+  g.setAttribute('normal',new THREE.BufferAttribute(mc.normalArray.slice(0,n*3),3));
+  g.scale(S,S,S); g.translate(c[0],c[1],c[2]); g.scale(PX,PX,PX); g.computeBoundingSphere();
+  mc.geometry.dispose();
+  return g;
+}
+
+/* ---------------- Material ---------------- */
+const VS=`varying vec3 vN; varying vec3 vV;
+void main(){ vN=normalize(normalMatrix*normal); vec4 mv=modelViewMatrix*vec4(position,1.); vV=normalize(-mv.xyz); gl_Position=projectionMatrix*mv; }`;
+const FS=`uniform float uGlow,uHover,uFade,uTime; uniform vec3 uBase,uCol; varying vec3 vN; varying vec3 vV;
+void main(){
+  vec3 N=normalize(vN), V=normalize(vV);
+  float f=1.-clamp(abs(dot(N,V)),0.,1.), rim=pow(f,2.6);
+  vec3 L1=normalize(vec3(-.4,.35,.85)), L2=normalize(vec3(.6,.15,.8));
+  float dif=max(dot(N,L1),0.);
+  float sp=pow(max(dot(N,normalize(L1+V)),0.),36.), sp2=pow(max(dot(N,normalize(L2+V)),0.),70.);
+  float g=uGlow+uHover*.25, flow=.92+.08*sin(uTime*1.2);
+  vec3 col=uBase*(.03+rim*.6+dif*.22)+uCol*g*(.09+rim*.85+dif*.22)*flow+vec3(sp*.3+sp2*.14);
+  float a=.05+rim*.4+dif*.1+sp*.25+sp2*.12+g*(.14+rim*.26+dif*.1);
+  gl_FragColor=vec4(col*uFade,clamp(a,0.,1.)*uFade);
+}`;
+function makeMat(col,base){
+  const uniforms={uTime:shared.uTime,uGlow:{value:.2},uHover:{value:0},uFade:{value:1},uBase:{value:new THREE.Color(base||'#a9bce6')},uCol:{value:new THREE.Color(col)}};
+  return new THREE.ShaderMaterial({uniforms,vertexShader:VS,fragmentShader:FS,transparent:true,depthWrite:false,depthFunc:THREE.LessEqualDepth});
+}
+const preMat=new THREE.MeshBasicMaterial({colorWrite:false,transparent:true,depthWrite:true});
+
+/* ---------------- Figure and armour ---------------- */
+const root=new THREE.Group(); scene.add(root);
+const pickables=[];
+function addLayered(parent,geo,mat,order,key){
+  const a=new THREE.Mesh(geo,preMat), b=new THREE.Mesh(geo,mat);
+  a.renderOrder=order; b.renderOrder=order+1; a.userData.key=key; parent.add(a,b); if(key) pickables.push(a);
+}
+const bodyMat=makeMat(PEARL,'#a9bce6');
+addLayered(root, buildMesh(figureSDF,[0,150,0],[70,162,30],180), bodyMat, 1, null);
+
+const P={}; // pieces
+function makePiece(key,sdf,c,h,R,order,base,anchor,explodeTo,rot){
+  const grp=new THREE.Group(); root.add(grp);
+  const inner=new THREE.Group(); grp.add(inner);
+  if(base) inner.position.set(base[0]*PX,base[1]*PX,base[2]*PX);
+  if(rot) inner.rotation.set(rot[0],rot[1],rot[2]);
+  const mat=makeMat(GOLD,'#b7c3dc');
+  addLayered(inner, buildMesh(sdf,c,h,R), mat, order, key);
+  P[key]={grp,mat,anchor:new THREE.Vector3(...anchor),explode:new THREE.Vector3(...explodeTo),phase:Math.random()*6};
+}
+makePiece('righteousness',breastSDF,[0,196,0],[72,58,20],130,3,null,[-.44,1.25,0],[-.62,.12,.25]);
+makePiece('truth',girdleSDF,[0,121,4],[42,37,22],120,5,null,[-.4,.82,0],[.55,-.02,.4]);
+makePiece('peace',shoesSDF,[0,14,8],[40,17,25],110,5,null,[.32,.06,0],[0,0,.7]);
+makePiece('salvation',helmetSDF,[0,284,-3],[34,30,34],110,5,null,[.33,1.76,0],[0,.38,.15]);
+makePiece('word',swordSDF,[0,-38,0],[11,62,8],130,7,[-52,122,3],[-.58,.36,0],[-.88,.08,.15],[-.28,0,-.12]);
+makePiece('faith',shieldSDF,[0,0,-2],[60,99,19],140,9,[64,150,27],[.78,1.02,0],[.88,.05,-.1],[0,.55,0]);
+
+/* fiery darts aimed at the shield */
+const DN=6, TR=10, dartPos=new Float32Array(DN*TR*3), dartSz=new Float32Array(DN*TR), dartPh=new Float32Array(DN*TR);
+for(let i=0;i<DN*TR;i++){dartSz[i]=1.6*(1-(i%TR)/TR)+.3; dartPh[i]=.25;}
+const dartGeo=new THREE.BufferGeometry(); dartGeo.setAttribute('position',new THREE.BufferAttribute(dartPos,3)); dartGeo.setAttribute('aSize',new THREE.BufferAttribute(dartSz,1)); dartGeo.setAttribute('aPhase',new THREE.BufferAttribute(dartPh,1));
+const dartMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+  uniforms:{uAmt:{value:0},uPix:{value:renderer.getPixelRatio()*70},uColor:{value:new THREE.Color('#ff9a5a')}},
+  vertexShader:`attribute float aSize; uniform float uPix; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.); gl_Position=projectionMatrix*mv; gl_PointSize=aSize*uPix/-mv.z; }`,
+  fragmentShader:`uniform float uAmt; uniform vec3 uColor; void main(){ float d=length(gl_PointCoord-.5); float a=smoothstep(.5,0.,d); gl_FragColor=vec4(mix(uColor,vec3(1.,.95,.8),a*a*.6),a*a*uAmt*1.4);}`});
+const dartPts=new THREE.Points(dartGeo,dartMat); dartPts.renderOrder=20; dartPts.frustumCulled=false; scene.add(dartPts);
+const darts=[...Array(DN)].map((_,i)=>({t:i/DN, from:new THREE.Vector3(), to:new THREE.Vector3()}));
+const tmpV=new THREE.Vector3(), bossLocal=new THREE.Vector3(0,0,8*PX);
+function aimDart(d){
+  const inner=P.faith.grp.children[0];
+  d.to.set((Math.random()-.5)*70*PX,(Math.random()-.5)*130*PX,6*PX); inner.localToWorld(d.to);
+  d.from.set(2.4+Math.random()*1.2, .5+Math.random()*1.4, -1.2+Math.random()*1.4);
+}
+darts.forEach(aimDart);
+
+/* light from above for prayer */
+const beamMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
+  uniforms:{uAmt:{value:0},uCol:{value:new THREE.Color(PEARL)}},
+  vertexShader:`varying vec2 u; void main(){u=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fragmentShader:`uniform float uAmt; uniform vec3 uCol; varying vec2 u; void main(){ float a=uAmt*.13*smoothstep(0.,.25,u.y)*(1.-smoothstep(.75,1.,u.y)); gl_FragColor=vec4(uCol,a);}`});
+const beam=new THREE.Mesh(new THREE.CylinderGeometry(.45,.75,4.2,48,1,true),beamMat); beam.position.y=2.0; beam.renderOrder=-2; scene.add(beam);
+const riseMat=pointsMat(PEARL); riseMat.uniforms.uAmt.value=0; riseMat.uniforms.uDrift.value=reduced?0:.18; riseMat.uniforms.uTop.value=3.4;
+{
+  const N=260,pos=new Float32Array(N*3),ph=new Float32Array(N),sz=new Float32Array(N);
+  for(let i=0;i<N;i++){const a=Math.random()*6.283,r=Math.sqrt(Math.random())*.55; pos[i*3]=Math.cos(a)*r; pos[i*3+1]=Math.random()*3.4; pos[i*3+2]=Math.sin(a)*r; ph[i]=Math.random(); sz[i]=.4+Math.random()*.8;}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aPhase',new THREE.BufferAttribute(ph,1));g.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
+  const p=new THREE.Points(g,riseMat); p.renderOrder=-1; scene.add(p);
+}
+
+/* floor halo */
+const haloMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+  uniforms:{uAmt:{value:.3},uCol:{value:new THREE.Color('#9fb6ea')}},
+  vertexShader:`varying vec2 u; void main(){u=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fragmentShader:`uniform float uAmt; uniform vec3 uCol; varying vec2 u; void main(){ float d=length(u-.5)*2.; float ring=smoothstep(.03,0.,abs(d-.78)); float disc=smoothstep(1.,0.,d)*.35; gl_FragColor=vec4(uCol,(ring*.9+disc)*uAmt);}`});
+{const h=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.5),haloMat); h.rotation.x=-Math.PI/2; h.position.y=.002; h.renderOrder=-3; scene.add(h);}
+
+/* post */
+const composer=new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene,camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(256,256),.75,.5,.18));
+composer.addPass(new OutputPass());
+
+/* labels */
+const labelsEl=document.getElementById('labels');
+function tag(cls,html){const d=document.createElement('div'); d.className='tag '+cls; d.innerHTML=html; labelsEl.appendChild(d); return d;}
+const baseTag=tag('base','Stand therefore<small>v. 14</small>');
+const pieceTags=PIECES.map(k=>({k,el:tag('',SHORT[k][0]+' · '+SHORT[k][1])}));
+const tv=new THREE.Vector3();
+function placeLabels(w,h,state){
+  const put=(el,v,o)=>{ v.project(camera); el.style.left=((v.x*.5+.5)*w)+'px'; el.style.top=((-v.y*.5+.5)*h)+'px'; el.style.opacity=v.z<1?o:0; };
+  put(baseTag, tv.set(0,-.14,.2), .9);
+  for(const t of pieceTags){
+    const p=P[t.k]; tv.copy(p.anchor).add(p.grp.position); root.localToWorld(tv);
+    put(t.el, tv, (p.mat.uniforms.uGlow.value>.55 || state.explode>.5)?1:0);
+  }
+}
+
+/* views */
+const VIEWS={
+  front:{pos:[0,1.05,5.0],tgt:[0,.92,0]},
+  wide:{pos:[.9,1.45,5.6],tgt:[-.22,.95,.2]},
+  three:{pos:[3.0,1.6,3.4],tgt:[0,1,0]},
+  side:{pos:[4.3,1.2,.3],tgt:[0,.95,0]},
+  above:{pos:[0,4.6,2.4],tgt:[0,.9,0]},
+  truth:{pos:[.6,1.0,1.9],tgt:[0,.8,.05]},
+  righteousness:{pos:[.7,1.35,2.3],tgt:[0,1.15,0]},
+  peace:{pos:[.75,.5,1.55],tgt:[0,.12,.05]},
+  faith:{pos:[2.3,1.3,3.1],tgt:[.35,.9,.15]},
+  salvation:{pos:[.8,1.85,1.7],tgt:[0,1.66,0]},
+  word:{pos:[-1.45,.9,1.9],tgt:[-.32,.45,.08]}
+};
+let tween=null;
+const chips=[...document.querySelectorAll('[data-view]')];
+function goView(k,fromChip){
+  chips.forEach(c=>c.setAttribute('aria-pressed',fromChip&&c.dataset.view===k));
+  const v=VIEWS[k]; tween={pos:new THREE.Vector3(...v.pos),tgt:new THREE.Vector3(...v.tgt)};
+  if(reduced){camera.position.copy(tween.pos); controls.target.copy(tween.tgt); tween=null;}
+}
+chips.forEach(c=>c.addEventListener('click',()=>goView(c.dataset.view,true)));
+controls.addEventListener('start',()=>{tween=null; chips.forEach(c=>c.setAttribute('aria-pressed','false'));});
+window.__onSelect=k=>goView(C[k].view);
+goView(C[current].view);
+if(tween){camera.position.copy(tween.pos); controls.target.copy(tween.tgt); tween=null;}
+
+/* picking */
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+let hover=null, downAt=null;
+function pick(e){
+  const r=renderer.domElement.getBoundingClientRect();
+  ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);
+  const hit=ray.intersectObjects(pickables,false)[0];
+  return hit?hit.object.userData.key:null;
+}
+renderer.domElement.addEventListener('pointermove',e=>{ if(e.pointerType==='touch') return; hover=pick(e); renderer.domElement.style.cursor=hover?'pointer':''; });
+renderer.domElement.addEventListener('pointerleave',()=>{hover=null;});
+renderer.domElement.addEventListener('pointerdown',e=>{downAt=[e.clientX,e.clientY];});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!downAt) return; const moved=Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1]); downAt=null;
+  if(moved>6) return; const k=pick(e); if(k) select(k);
+});
+
+/* resize */
+function resize(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  renderer.setSize(w,h,false); composer.setSize(w,h);
+  camera.aspect=w/h; camera.fov=w/h<.9?50:34; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+/* loop */
+const clock=new THREE.Clock();
+const ease=(a,b,k)=>a+(b-a)*k;
+const state={explode:1,body:.2,pray:0,darts:0};
+function targets(){
+  const L=C[current].light;
+  if(L.focus) return {explode:0, body:.12, pray:0, darts:L.darts||0, piece:k=>k===L.focus?1:.1};
+  return {explode:L.explode, body:L.body, pray:L.pray, darts:0, piece:()=>L.pieces};
+}
+function tick(){
+  const dt=Math.min(clock.getDelta(),.05);
+  const t=(shared.uTime.value+=reduced?0:dt);
+  const T=targets(), k=1-Math.pow(.004,dt), ke=1-Math.pow(.03,dt);
+  state.explode=ease(state.explode,T.explode,ke);
+  state.body=ease(state.body,T.body,k);
+  state.pray=ease(state.pray,T.pray,k);
+  state.darts=ease(state.darts,T.darts,k);
+  bodyMat.uniforms.uGlow.value=state.body;
+  for(const key of PIECES){
+    const p=P[key], u=p.mat.uniforms;
+    u.uGlow.value=ease(u.uGlow.value,T.piece(key),k);
+    u.uHover.value=ease(u.uHover.value,hover===key?1:0,k*1.5);
+    const bob=reduced?0:Math.sin(t*.9+p.phase)*.025*state.explode;
+    p.grp.position.copy(p.explode).multiplyScalar(state.explode); p.grp.position.y+=bob;
+  }
+  if(!reduced) root.rotation.y=Math.sin(t*.35)*.06;
+  beamMat.uniforms.uAmt.value=state.pray; riseMat.uniforms.uAmt.value=state.pray*.9;
+  haloMat.uniforms.uAmt.value=.25+.35*state.pray;
+  // darts
+  dartMat.uniforms.uAmt.value=state.darts;
+  if(state.darts>.01){
+    for(let i=0;i<DN;i++){
+      const d=darts[i]; d.t+=dt*.45; if(d.t>=1){ d.t=0; aimDart(d); }
+      for(let j=0;j<TR;j++){
+        const s=Math.max(0,d.t-j*.012); tmpV.copy(d.from).lerp(d.to,s);
+        const o=(i*TR+j)*3; dartPos[o]=tmpV.x; dartPos[o+1]=tmpV.y+Math.sin(s*3.14)*.25; dartPos[o+2]=tmpV.z;
+        dartSz[i*TR+j]=(d.t>.96?0:1)*(1.8*(1-j/TR)+.3);
+      }
+    }
+    dartGeo.attributes.position.needsUpdate=true; dartGeo.attributes.aSize.needsUpdate=true;
+  }
+  if(tween){ const tk=1-Math.pow(.02,dt); camera.position.lerp(tween.pos,tk); controls.target.lerp(tween.tgt,tk); if(camera.position.distanceTo(tween.pos)<.01) tween=null; }
+  controls.update();
+  composer.render();
+  placeLabels(stage.clientWidth,stage.clientHeight,state);
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+
+</body>
+</html>
